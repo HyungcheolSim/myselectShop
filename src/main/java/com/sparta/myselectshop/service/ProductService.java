@@ -28,7 +28,7 @@ public class ProductService {
     public static final int MIN_MY_PRICE = 100;
 
     public ProductResponseDto createProduct(ProductRequestDto requestDto, User user) {
-        Product product = productRepository.save(new Product(requestDto,user));
+        Product product = productRepository.save(new Product(requestDto, user));
         return new ProductResponseDto(product);
     }
 
@@ -47,16 +47,16 @@ public class ProductService {
 
     @Transactional(readOnly = true) //기본 설정인 지연로딩을 구현하기 위해 추가
     public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
-        Sort.Direction direction= isAsc?Sort.Direction.ASC:Sort.Direction.DESC;
-        Sort sort = Sort.by(direction,sortBy);
-        Pageable pageable = PageRequest.of(page,size,sort);
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        UserRoleEnum userRoleEnum=user.getRole();
+        UserRoleEnum userRoleEnum = user.getRole();
         Page<Product> productList;
-        if(userRoleEnum==UserRoleEnum.USER){
-            productList=productRepository.findAllByUser(user,pageable);
-        }else{
-            productList=productRepository.findAll(pageable);
+        if (userRoleEnum == UserRoleEnum.USER) {
+            productList = productRepository.findAllByUser(user, pageable);
+        } else {
+            productList = productRepository.findAll(pageable);
         }
         return productList.map(ProductResponseDto::new);
 
@@ -64,36 +64,36 @@ public class ProductService {
 
     @Transactional
     public void updateBySearch(Long id, ItemDto itemDto) {
-        Product product = productRepository.findById(id).orElseThrow(()->
+        Product product = productRepository.findById(id).orElseThrow(() ->
                 new NullPointerException("해당 상품은 존재하지 않습니다.")
         );
         product.updateByItemDto(itemDto);
     }
 
     public void addFolder(Long productId, Long folderId, User user) {
-        Product product=productRepository.findById(productId).orElseThrow(()->
+        Product product = productRepository.findById(productId).orElseThrow(() ->
                 new NullPointerException("해당 상품이 존재하지 않습니다."));
-        Folder folder= folderRepository.findById(folderId).orElseThrow(()->
+        Folder folder = folderRepository.findById(folderId).orElseThrow(() ->
                 new NullPointerException("해당 폴더가 존재하지 않습니다."));
         //상품과 폴더에 해당하는 유저가 인증한 유저가 맞는지 확인
-        if(!product.getUser().getId().equals(user.getId())||!folder.getUser().getId().equals(user.getId())){
+        if (!product.getUser().getId().equals(user.getId()) || !folder.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("회원님의 관심상품이 아니거나, 회원님의 폴더가 아닙니다.");
         }
         //해당 폴더가 등록된 폴더인지 확인
-        Optional<ProductFolder> overlapFolder = productFolderRepository.findByProductAndFolder(product,folder);
-        if(overlapFolder.isPresent()){
+        Optional<ProductFolder> overlapFolder = productFolderRepository.findByProductAndFolder(product, folder);
+        if (overlapFolder.isPresent()) {
             throw new IllegalArgumentException("중복된 폴더입니다.");
         }
-        productFolderRepository.save(new ProductFolder(product,folder));
+        productFolderRepository.save(new ProductFolder(product, folder));
     }
 
     public Page<ProductResponseDto> getProductsInFolder(Long folderId, int page, int size, String sortBy, boolean isAsc, User user) {
-        Sort.Direction direction= isAsc?Sort.Direction.ASC:Sort.Direction.DESC;
-        Sort sort = Sort.by(direction,sortBy);
-        Pageable pageable = PageRequest.of(page,size,sort);
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Product> productList = productRepository.findAllByUserAndProductFolderList_folderId(user,folderId,pageable);
-        Page<ProductResponseDto> responseDtoList=productList.map(ProductResponseDto::new);
+        Page<Product> productList = productRepository.findAllByUserAndProductFolderList_folderId(user, folderId, pageable);
+        Page<ProductResponseDto> responseDtoList = productList.map(ProductResponseDto::new);
 
         return responseDtoList;
 

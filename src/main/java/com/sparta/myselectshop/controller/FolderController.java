@@ -15,15 +15,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FolderController {
     private final FolderService folderService;
+
     @PostMapping("/folders")
-    public void addFolder(@RequestBody FolderRequestDto folderRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
-        List<String> folderNames=folderRequestDto.getFolderNames();
-        folderService.addFolders(folderNames,userDetails.getUser());
+    public void addFolder(@RequestBody FolderRequestDto folderRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<String> folderNames = folderRequestDto.getFolderNames();
+        folderService.addFolders(folderNames, userDetails.getUser());
 
     }
 
     @GetMapping("/folders")
-    public List<FolderResponseDto> getFolders(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public List<FolderResponseDto> getFolders(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return folderService.getFolders(userDetails.getUser());
     }
 }
