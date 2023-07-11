@@ -81,7 +81,7 @@ public class UserController {
     public String kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
         //jwt를 쿠키에 넣을 떄는 HttpServletResponse 를 사용해서 받는다.
         String token=kakaoService.kakaoLogin(code);
-        Cookie cookie =new Cookie(JwtUtil.AUTHORIZATION_HEADER, token.substring(7));
+        Cookie cookie =new Cookie(JwtUtil.AUTHORIZATION_HEADER, token.substring(7)); //카카오 로그인 할 떄는 bearer 붙어있으면 안되나벼 오류뜨네
         cookie.setPath("/");
         response.addCookie(cookie);
         return "redirect:/";
