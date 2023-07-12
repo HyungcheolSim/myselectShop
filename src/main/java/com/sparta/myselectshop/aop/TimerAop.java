@@ -9,26 +9,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-@Slf4j(topic = "UseTimeAop")
+@Slf4j(topic = "TimerAop")
 @Aspect
-//@Component
+@Component
 @RequiredArgsConstructor
-public class UseTimeAop {
+public class TimerAop {
     private final ApiUseTimeRepository apiUseTimeRepository;
 
-    @Pointcut("execution(* com.sparta.myselectshop.controller.ProductController.*(..))")
-    private void product(){}
-    @Pointcut("execution(* com.sparta.myselectshop.controller.FolderController.*(..))")
-    private void folder(){}
-    @Pointcut("execution(* com.sparta.myselectshop.naver.controller.NaverApiController.*(..))")
-    private void naver(){}
-
-    @Around("product()|| folder() || naver()")
+    @Around("@annotation(com.sparta.myselectshop.aop.Timer)")
     public Object execute(ProceedingJoinPoint joinPoint) throws Throwable{
         //측정 시작 시간
         long startTime=System.currentTimeMillis();
@@ -47,7 +39,7 @@ public class UseTimeAop {
                 //로그인 회원 정보
                 UserDetailsImpl userDetails=(UserDetailsImpl) auth.getPrincipal();
                 User loginUser = userDetails.getUser();
-                
+
                 //API 사용 시간 및 DB 에 기록
                 ApiUseTime apiUseTime= apiUseTimeRepository.findByUser(loginUser).orElse(null);
 
